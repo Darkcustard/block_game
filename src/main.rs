@@ -61,7 +61,7 @@ fn main() {
     let GEOM_SHADER = std::fs::read_to_string("src/geometry.vert").expect("Failed to read geometry shader.");
     let VERT_SHADER = std::fs::read_to_string("src/vertex.vert").expect("Failed to read vertex shader.");
 
-    let pt:[f32;6] = [-1.0, 0.0, 1.0, 0.0, 0.0, 1.0];
+    let pt:[f32;6] = [-0.5, 0.0, 0.5, 0.0, 0.0, 0.5];
 
 
     // Create GPU pipeline
@@ -200,7 +200,7 @@ fn main() {
         let mut shader_program = gl::CreateProgram();
         assert_ne!(shader_program,0);
         gl::AttachShader(shader_program, vertex_shader);
-        //gl::AttachShader(shader_program, geometry_shader);
+        gl::AttachShader(shader_program, geometry_shader);
         gl::AttachShader(shader_program, fragment_shader);
         gl::LinkProgram(shader_program);
 
@@ -220,7 +220,7 @@ fn main() {
         }
 
         gl::DeleteShader(vertex_shader);
-        //gl::DeleteShader(geometry_shader);
+        gl::DeleteShader(geometry_shader);
         gl::DeleteShader(fragment_shader);
         gl::UseProgram(shader_program);
 
@@ -257,7 +257,7 @@ fn main() {
             gl::ClearColor(0.05, 0.1, 0.3, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
 
-            gl::DrawArrays(gl::TRIANGLES, 0, 6 as i32);
+            gl::DrawArrays(gl::POINTS, 0, 9 as i32);
         }
 
 
