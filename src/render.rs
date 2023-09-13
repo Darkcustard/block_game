@@ -1,9 +1,9 @@
 
 pub struct Vec3 {
 
-    x : f32,
-    y : f32,
-    z : f32,
+    pub x : f32,
+    pub y : f32,
+    pub z : f32,
 
 }
 
@@ -29,10 +29,10 @@ impl Vec3 {
 
 pub struct Camera {
 
-    pos : Vec3,
-    ang : Vec3,
-    fovx : f32,
-    fovy : f32,
+    pub pos : Vec3,
+    pub ang : Vec3,
+    pub fovx : f32,
+    pub fovy : f32,
 
 }
 
@@ -50,10 +50,10 @@ impl Camera {
 
 pub struct LightRadial {
 
-    pos : Vec3,
-    color : Vec3,
-    strength : f32,
-    radius : f32,
+    pub pos : Vec3,
+    pub color : Vec3,
+    pub strength : f32,
+    pub radius : f32,
 
 }
 

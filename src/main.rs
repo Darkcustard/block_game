@@ -12,7 +12,7 @@ mod perlin_2d;
 
 fn build_camera() -> render::Camera{
 
-    let pos : render::Vec3 = render::Vec3::create(0.0, 0.0, 0.0);
+    let pos : render::Vec3 = render::Vec3::create(0.0, 0.0, -5.0);
     let ang : render::Vec3 = render::Vec3::create(0.0, 0.0, 0.0);
     let fovx : f32 = 1.5;
     let fovy : f32 = 1.5;
@@ -31,12 +31,20 @@ fn main() {
 
     // config
     let title = "Block Game";
-    let resolution : [u32; 2] = [1000,500];
+    let resolution : [u32; 2] = [1920,1080];
 
 
     // Camera
     println!("Building Camera.");
     let mut camera = build_camera();
+
+    // Sun
+    let mut sun = render::LightRadial::create(
+        render::Vec3::create(50.0, 50.0, 50.0),
+        render::Vec3::create(50.0, 50.0, 50.0),
+        1.0, 
+        100.0
+    );
 
 
 
@@ -55,13 +63,14 @@ fn main() {
     println!("Initializing GL and loading shaders.");
     let gl_context = window.gl_create_context().unwrap();
     gl::load_with(|s| video_subsys.gl_get_proc_address(s) as *const std::os::raw::c_void);
+    let mut shader_program = 0;
 
     // Load Shader files
     let FRAG_SHADER = std::fs::read_to_string("src/fragment.vert").expect("Failed to read fragment shader.");
     let GEOM_SHADER = std::fs::read_to_string("src/geometry.vert").expect("Failed to read geometry shader.");
     let VERT_SHADER = std::fs::read_to_string("src/vertex.vert").expect("Failed to read vertex shader.");
 
-    let pt:[f32;6] = [-0.5, 0.0, 0.5, 0.0, 0.0, 0.5];
+    let pt:[f32;3] = [0.0, 0.0, 0.5];
 
 
     // Create GPU pipeline
@@ -91,10 +100,10 @@ fn main() {
         // Describe our data
         gl::VertexAttribPointer(
             0, 
-            2,
+            3,
             gl::FLOAT,
             gl::FALSE,
-            (2*std::mem::size_of::<f32>()) as i32,
+            (3*std::mem::size_of::<f32>()) as i32,
             0 as *const _,
 
 
@@ -197,7 +206,7 @@ fn main() {
 
 
         // Compile shaders into program
-        let mut shader_program = gl::CreateProgram();
+        shader_program = gl::CreateProgram();
         assert_ne!(shader_program,0);
         gl::AttachShader(shader_program, vertex_shader);
         gl::AttachShader(shader_program, geometry_shader);
@@ -228,11 +237,6 @@ fn main() {
 
 
 
-        println!("{}", gl::GetError());
-
-
-
-
 
 
     }
@@ -252,12 +256,38 @@ fn main() {
             }
         }
 
+        camera.ang.y += 0.01;
+
 
         unsafe {
+
+            let cam_pos_loc = gl::GetUniformLocation(shader_program, std::ffi::CString::new("cam_pos").expect("CString::new failed").as_ptr());
+            let cam_ang_loc = gl::GetUniformLocation(shader_program, std::ffi::CString::new("cam_ang").expect("CString::new failed").as_ptr());
+            let cam_fovx_loc = gl::GetUniformLocation(shader_program, std::ffi::CString::new("cam_fovx").expect("CString::new failed").as_ptr());
+            let cam_fovy_loc = gl::GetUniformLocation(shader_program, std::ffi::CString::new("cam_fovy").expect("CString::new failed").as_ptr());
+
+            let light_pos_loc = gl::GetUniformLocation(shader_program, std::ffi::CString::new("light_pos").expect("CString::new failed").as_ptr());
+            let light_color_loc = gl::GetUniformLocation(shader_program, std::ffi::CString::new("light_color").expect("CString::new failed").as_ptr());
+            let light_strength_loc = gl::GetUniformLocation(shader_program, std::ffi::CString::new("light_strength").expect("CString::new failed").as_ptr());
+            let light_radius_loc = gl::GetUniformLocation(shader_program, std::ffi::CString::new("light_radius").expect("CString::new failed").as_ptr());
+
+            gl::Uniform3f(cam_pos_loc, camera.pos.x, camera.pos.y, camera.pos.z);
+            gl::Uniform3f(cam_ang_loc, camera.ang.x, camera.ang.y, camera.ang.z);
+            gl::Uniform1f(cam_fovx_loc, camera.fovx);
+            gl::Uniform1f(cam_fovy_loc, camera.fovy);
+
+            gl::Uniform3f(light_pos_loc, sun.pos.x, sun.pos.y, sun.pos.z);
+            gl::Uniform3f(light_color_loc, sun.color.x, sun.color.y, sun.color.z);
+            gl::Uniform1f(light_strength_loc, sun.strength);
+            gl::Uniform1f(light_radius_loc, sun.radius);
+
+
+
             gl::ClearColor(0.05, 0.1, 0.3, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
 
-            gl::DrawArrays(gl::POINTS, 0, 9 as i32);
+            gl::DrawArrays(gl::POINTS, 0, 1 as i32);
+
         }
 
 
