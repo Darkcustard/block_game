@@ -12,8 +12,8 @@ mod perlin_2d;
 
 fn build_camera() -> render::Camera{
 
-    let pos : render::Vec3 = render::Vec3::create(0.0, 0.0, -5.0);
-    let ang : render::Vec3 = render::Vec3::create(0.0, 0.0, 0.0);
+    let pos : render::Vec3 = render::Vec3::create(250.0, 2.5, 250.0);
+    let ang : render::Vec3 = render::Vec3::create(0.2, 0.0, 0.0);
     let fovx : f32 = 1.5;
     let fovy : f32 = 1.5;
 
@@ -40,8 +40,8 @@ fn main() {
 
     // Sun
     let mut sun = render::LightRadial::create(
-        render::Vec3::create(50.0, 50.0, 50.0),
-        render::Vec3::create(50.0, 50.0, 50.0),
+        render::Vec3::create(250.0, 250.0, 250.0),
+        render::Vec3::create(1.0, 1.0, 0.2),
         1.0, 
         100.0
     );
@@ -70,7 +70,44 @@ fn main() {
     let GEOM_SHADER = std::fs::read_to_string("src/geometry.vert").expect("Failed to read geometry shader.");
     let VERT_SHADER = std::fs::read_to_string("src/vertex.vert").expect("Failed to read vertex shader.");
 
-    let pt:[f32;3] = [0.0, 0.0, 0.5];
+
+    // Terrain Generation
+    let mut octaves : Vec<[u64;2]> = Vec::new();
+
+    octaves.push([2,2]);
+    octaves.push([4,4]);
+
+    let continental_map = perlin_2d::NoiseMap2D::new(octaves);
+
+
+
+    const WIDTH : usize = 500;
+    const LENGTH : usize = 500;
+
+    let mut pt:[f32;WIDTH*LENGTH*3] = [0.0; WIDTH*LENGTH*3];
+    let mut i : usize = 0;
+
+    for r in 0..WIDTH{
+
+        for c in 0..LENGTH {
+
+            // x y z
+            let x = c as f32*1.0;
+            let z = r as f32*1.0;
+            let y = (continental_map.poll((x / WIDTH as f32) as f64, (z / LENGTH as f32) as f64) * 100.0).round() as f32 - 100.0;
+
+            pt[i*3] = x;
+            pt[i*3+1] = y;
+            pt[i*3+2] = z;
+
+            i += 1;
+        }
+
+
+    }
+
+
+    
 
 
     // Create GPU pipeline
@@ -235,7 +272,7 @@ fn main() {
 
 
 
-
+        gl::Enable(gl::DEPTH_TEST);
 
 
 
@@ -256,7 +293,36 @@ fn main() {
             }
         }
 
-        camera.ang.y += 0.01;
+        let forward: [f32;3] = [camera.ang.x.cos()*(-camera.ang.y + 3.14159/2.0).cos()*0.5, (-camera.ang.x).sin()*0.5, camera.ang.x.cos()*(-camera.ang.y + 3.14159/2.0).sin()*0.5];
+        let left: [f32;3] = [camera.ang.x.cos()*(-camera.ang.y + 3.14159).cos()*0.5, (-camera.ang.x).sin()*0.5, camera.ang.x.cos()*(-camera.ang.y + 3.14159).sin()*0.5];
+        let right: [f32;3] = [camera.ang.x.cos()*(-camera.ang.y - 3.14159).cos()*0.5, (-camera.ang.x).sin()*0.5, camera.ang.x.cos()*(-camera.ang.y - 3.14159).sin()*0.5];
+
+
+
+
+        for code in event_pump.keyboard_state().pressed_scancodes(){
+
+            let key = code.name().to_lowercase() as String;
+
+            match key.as_str() {
+
+                "space" => {camera.pos.y += 0.5},
+                "left ctrl" => {camera.pos.y -= 0.5},
+                "left" => { camera.ang.y -= 0.025},
+                "right" => { camera.ang.y += 0.025},
+                "up" => { camera.ang.x -= 0.025},
+                "down" => { camera.ang.x += 0.025}, 
+
+                "left shift" => {camera.pos.x += forward[0]*2.0; camera.pos.y += forward[1]*2.0; camera.pos.z += forward[2]*2.0},
+                "w" => {camera.pos.x += forward[0]; camera.pos.y += forward[1]; camera.pos.z += forward[2]},
+                "s" => {camera.pos.x -= forward[0]; camera.pos.y -= forward[1]; camera.pos.z -= forward[2]},    
+                "a" => {camera.pos.x += right[0]; camera.pos.z += right[2]},
+                "d" => {camera.pos.x -= left[0]; camera.pos.z -= left[2]},           
+                
+                _ => {println!{"{}",key}},
+              }
+
+          }
 
 
         unsafe {
@@ -285,8 +351,9 @@ fn main() {
 
             gl::ClearColor(0.05, 0.1, 0.3, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
+            gl::Clear(gl::DEPTH_BUFFER_BIT);
 
-            gl::DrawArrays(gl::POINTS, 0, 1 as i32);
+            gl::DrawArrays(gl::POINTS, 0, (pt.len()/3) as i32);
 
         }
 
