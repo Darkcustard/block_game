@@ -82,7 +82,7 @@ void main() {
     shift = block_size/2.0;
 
     brown = normalize(vec3(97.0, 59.0, 10.0));
-    green = normalize(vec3(18, 99, 11));
+    green = vec3(0.2, 0.8, 0.1);
 
     // Create Vertices
     tfl = origin + vec3(-shift.x, shift.y, shift.z);

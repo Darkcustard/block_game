@@ -41,7 +41,7 @@ fn main() {
     // Sun
     let mut sun = render::LightRadial::create(
         render::Vec3::create(250.0, 250.0, 250.0),
-        render::Vec3::create(1.0, 1.0, 0.2),
+        render::Vec3::create(1.0, 1.0, 1.0),
         1.0, 
         100.0
     );
@@ -71,15 +71,14 @@ fn main() {
     let VERT_SHADER = std::fs::read_to_string("src/vertex.vert").expect("Failed to read vertex shader.");
 
 
+    println!("Building Terrain.");
+
     // Terrain Generation
     let mut octaves : Vec<[u64;2]> = Vec::new();
-
     octaves.push([2,2]);
-    octaves.push([4,4]);
-
+    octaves.push([5,5]);
+    octaves.push([10,10]);
     let continental_map = perlin_2d::NoiseMap2D::new(octaves);
-
-
 
     const WIDTH : usize = 500;
     const LENGTH : usize = 500;
@@ -94,7 +93,11 @@ fn main() {
             // x y z
             let x = c as f32*1.0;
             let z = r as f32*1.0;
-            let y = (continental_map.poll((x / WIDTH as f32) as f64, (z / LENGTH as f32) as f64) * 100.0).round() as f32 - 100.0;
+            let mut y = -100.0; 
+            y += (continental_map.poll((x / WIDTH as f32) as f64, (z / LENGTH as f32) as f64) * 100.0).round() as f32;
+            if y < -60.0{
+                y = -60.0
+            }
 
             pt[i*3] = x;
             pt[i*3+1] = y;
@@ -109,7 +112,7 @@ fn main() {
 
     
 
-
+    println!("Creating GPU Pipeline.");
     // Create GPU pipeline
     unsafe {
 
@@ -280,6 +283,7 @@ fn main() {
 
 
    // Event Loop
+   println!("Starting Gameloop.");
    'gameloop: loop {
 
 
@@ -348,8 +352,8 @@ fn main() {
             gl::Uniform1f(light_radius_loc, sun.radius);
 
 
-
-            gl::ClearColor(0.05, 0.1, 0.3, 1.0);
+            
+            gl::ClearColor(0.05, 0.4, 0.5, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
             gl::Clear(gl::DEPTH_BUFFER_BIT);
 
