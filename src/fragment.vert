@@ -22,7 +22,7 @@ void main()
     wColor = fColor;
 
     if (midpoint.y < -59.0){
-        wColor = vec4(0.0, 0.4, 0.7, 1.0);
+        wColor = vec4(0.0, 0.4, 0.8, 1.0);
     }
     else if (midpoint.y < -55.0){
         wColor = vec4(1.0, 1.0, 0.0, 1.0);
@@ -37,6 +37,7 @@ void main()
 
     else if (midpoint.y < -0.0){
        wColor = vec4(1.0, 1.0, 1.0, 1.0); 
+       //wColor = vec4(sin(midpoint.x/100), 0.0, cos(midpoint.z/100), 1.0);
     }
 
     

@@ -2,6 +2,8 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
+use std::mem::size_of_val;
+
 //use sdl2;
 use gl;
 
@@ -12,7 +14,7 @@ mod perlin_2d;
 
 fn build_camera() -> render::Camera{
 
-    let pos : render::Vec3 = render::Vec3::create(250.0, 2.5, 250.0);
+    let pos : render::Vec3 = render::Vec3::create(0.0, 2.5, 0.0);
     let ang : render::Vec3 = render::Vec3::create(0.2, 0.0, 0.0);
     let fovx : f32 = 1.5;
     let fovy : f32 = 1.5;
@@ -40,7 +42,7 @@ fn main() {
 
     // Sun
     let mut sun = render::LightRadial::create(
-        render::Vec3::create(250.0, 250.0, 250.0),
+        render::Vec3::create(500.0, 250.0, 250.0),
         render::Vec3::create(1.0, 1.0, 1.0),
         1.0, 
         100.0
@@ -71,46 +73,23 @@ fn main() {
     let VERT_SHADER = std::fs::read_to_string("src/vertex.vert").expect("Failed to read vertex shader.");
 
 
+
+
+
     println!("Building Terrain.");
 
     // Terrain Generation
     let mut octaves : Vec<[u64;2]> = Vec::new();
-    octaves.push([2,2]);
-    octaves.push([5,5]);
-    octaves.push([10,10]);
+    octaves.push([100,100]);
+    octaves.push([125,250]);
+    octaves.push([500,500]);
+    octaves.push([1000,1000]);
     let continental_map = perlin_2d::NoiseMap2D::new(octaves);
+    let pt: [f32;750000] = [-100.0;750000];   
 
-    const WIDTH : usize = 500;
-    const LENGTH : usize = 500;
-
-    let mut pt:[f32;WIDTH*LENGTH*3] = [0.0; WIDTH*LENGTH*3];
-    let mut i : usize = 0;
-
-    for r in 0..WIDTH{
-
-        for c in 0..LENGTH {
-
-            // x y z
-            let x = c as f32*1.0;
-            let z = r as f32*1.0;
-            let mut y = -100.0; 
-            y += (continental_map.poll((x / WIDTH as f32) as f64, (z / LENGTH as f32) as f64) * 100.0).round() as f32;
-            if y < -60.0{
-                y = -60.0
-            }
-
-            pt[i*3] = x;
-            pt[i*3+1] = y;
-            pt[i*3+2] = z;
-
-            i += 1;
-        }
-
-
-    }
-
-
-    
+    // Start Chunkloader
+    println!("Starting Chunk Loader");
+    let mut chunk_loader = render::ChunkLoader::create(&continental_map, &camera); 
 
     println!("Creating GPU Pipeline.");
     // Create GPU pipeline
@@ -281,10 +260,70 @@ fn main() {
 
     }
 
+    let mut block_data = chunk_loader.get_block_data(&continental_map);
+    let mut data_pos = 0;
+    
+
+    for i in 0..block_data.len(){
+
+        unsafe {
+
+            gl::BufferSubData(
+                gl::ARRAY_BUFFER,
+                data_pos,
+                size_of_val(&pt) as isize,
+                block_data[i].as_ptr().cast()
+
+            );
+
+        }
+
+        data_pos += 1200;
+    }
+
+
+
+
 
    // Event Loop
    println!("Starting Gameloop.");
    'gameloop: loop {
+
+        // Camera chunk system
+        let new_coords: [i32;2] = chunk_loader.get_camera_chunk(&camera);
+        if camera.current_chunk != new_coords {
+
+            let shift = [new_coords[0]-camera.current_chunk[0], new_coords[1]-camera.current_chunk[1]];
+            chunk_loader.shift(shift, &continental_map);
+
+
+
+            camera.current_chunk = new_coords;
+            //chunk_loader.update(&camera);
+            
+
+            let mut block_data = chunk_loader.get_block_data(&continental_map);
+            let mut data_pos = 0;
+            
+
+            for i in 0..block_data.len(){
+
+                unsafe {
+
+                    gl::BufferSubData(
+                        gl::ARRAY_BUFFER,
+                        data_pos,
+                        size_of_val(&pt) as isize,
+                        block_data[i].as_ptr().cast()
+
+                    );
+
+                }
+
+                data_pos += 1200;
+            }
+
+        }
 
 
         // Handle Events
@@ -321,7 +360,7 @@ fn main() {
                 "w" => {camera.pos.x += forward[0]; camera.pos.y += forward[1]; camera.pos.z += forward[2]},
                 "s" => {camera.pos.x -= forward[0]; camera.pos.y -= forward[1]; camera.pos.z -= forward[2]},    
                 "a" => {camera.pos.x += right[0]; camera.pos.z += right[2]},
-                "d" => {camera.pos.x -= left[0]; camera.pos.z -= left[2]},           
+                "d" => {camera.pos.x -= left[0]; camera.pos.z -= left[2]},     
                 
                 _ => {println!{"{}",key}},
               }
