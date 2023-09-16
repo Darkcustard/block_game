@@ -42,7 +42,7 @@ fn main() {
 
     // Sun
     let mut sun = render::LightRadial::create(
-        render::Vec3::create(500.0, 250.0, 250.0),
+        render::Vec3::create(500.0, 2500.0, 250.0),
         render::Vec3::create(1.0, 1.0, 1.0),
         1.0, 
         100.0
@@ -80,10 +80,10 @@ fn main() {
 
     // Terrain Generation
     let mut octaves : Vec<[u64;2]> = Vec::new();
+    octaves.push([50,50]);
     octaves.push([100,100]);
-    octaves.push([125,250]);
+    octaves.push([200,200]);
     octaves.push([500,500]);
-    octaves.push([1000,1000]);
     let continental_map = perlin_2d::NoiseMap2D::new(octaves);
     let pt: [f32;750000] = [-100.0;750000];   
 
@@ -356,7 +356,7 @@ fn main() {
                 "up" => { camera.ang.x -= 0.025},
                 "down" => { camera.ang.x += 0.025}, 
 
-                "left shift" => {camera.pos.x += forward[0]*2.0; camera.pos.y += forward[1]*2.0; camera.pos.z += forward[2]*2.0},
+                "left shift" => {camera.pos.x += forward[0]*10.0; camera.pos.y += forward[1]*10.0; camera.pos.z += forward[2]*10.0},
                 "w" => {camera.pos.x += forward[0]; camera.pos.y += forward[1]; camera.pos.z += forward[2]},
                 "s" => {camera.pos.x -= forward[0]; camera.pos.y -= forward[1]; camera.pos.z -= forward[2]},    
                 "a" => {camera.pos.x += right[0]; camera.pos.z += right[2]},
