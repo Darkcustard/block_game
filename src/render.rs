@@ -83,15 +83,15 @@ impl ChunkLoader {
 
     pub fn create( noise_map : &perlin_2d::NoiseMap2D, camera : &Camera) -> ChunkLoader {
 
-        let max_chunks = 625;
+        let max_chunks = 1000;
         let mut loaded_chunks: Vec<Vec<Chunk>> = Vec::new();
 
         // assume 0,0 spawn
-        for x in -12..13  {
+        for x in -15..16  {
 
             let mut row : Vec<Chunk> = Vec::new();
 
-            for z in -12..13 as i32 {
+            for z in -15..16 as i32 {
 
                 row.push(Chunk::create([x,z], noise_map))
                 
@@ -171,7 +171,7 @@ impl ChunkLoader {
                 let mut new_row : Vec<Chunk> = Vec::new();
                 let first = self.loaded_chunks[0][0].coords;
 
-                for i in 0..25 {
+                for i in 0..31 {
                     new_row.push(Chunk::create([first[0]-1,first[1]+i], noise_map))
 
                 }
@@ -193,7 +193,7 @@ impl ChunkLoader {
                 let mut new_row : Vec<Chunk> = Vec::new();
                 let first = self.loaded_chunks[self.loaded_chunks.len()-1][0].coords;
 
-                for i in 0..25 {
+                for i in 0..31 {
                     new_row.push(Chunk::create([first[0]+1,first[1]+i], noise_map))
 
                 }

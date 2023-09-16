@@ -85,7 +85,7 @@ fn main() {
     octaves.push([200,200]);
     octaves.push([500,500]);
     let continental_map = perlin_2d::NoiseMap2D::new(octaves);
-    let pt: [f32;750000] = [-100.0;750000];   
+    let pt: [f32;1000000] = [-100.0;1000000];   
 
     // Start Chunkloader
     println!("Starting Chunk Loader");
@@ -110,7 +110,7 @@ fn main() {
         gl::BufferData(
 
             gl::ARRAY_BUFFER,
-            std::mem::size_of_val(&pt) as isize,
+            (1000000*std::mem::size_of::<f32>())as isize,
             pt.as_ptr().cast(),
             gl::DYNAMIC_DRAW
         
@@ -252,10 +252,7 @@ fn main() {
         gl::DeleteShader(fragment_shader);
         gl::UseProgram(shader_program);
 
-
-
         gl::Enable(gl::DEPTH_TEST);
-
 
 
     }
@@ -399,6 +396,7 @@ fn main() {
             gl::DrawArrays(gl::POINTS, 0, (pt.len()/3) as i32);
 
         }
+
 
 
 
