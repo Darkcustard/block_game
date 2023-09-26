@@ -56,6 +56,7 @@ fn main() {
     let video_subsys = sdl_context.video().unwrap();
     let window = video_subsys.window(title, resolution[0], resolution[1])
         .position_centered()
+        .fullscreen()
         .opengl()
         .build()
         .expect("Failed To Create Window");
@@ -83,7 +84,7 @@ fn main() {
     octaves.push([50,50]);
     octaves.push([100,100]);
     octaves.push([200,200]);
-    octaves.push([500,500]);
+    octaves.push([400,400]);
     let continental_map = perlin_2d::NoiseMap2D::new(octaves);
     let pt: [f32;1000000] = [-100.0;1000000];   
 
@@ -359,7 +360,7 @@ fn main() {
                 "a" => {camera.pos.x += right[0]; camera.pos.z += right[2]},
                 "d" => {camera.pos.x -= left[0]; camera.pos.z -= left[2]},     
                 
-                _ => {println!{"{}",key}},
+                _ => {},
               }
 
           }
