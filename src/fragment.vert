@@ -21,17 +21,17 @@ void main()
     ambient_strength = 0.3;
     wColor = fColor;
 
-    if (midpoint.y < -59.0){
+    if (midpoint.y < -198.0){
         wColor = vec4(0.0, 0.4, 0.8, 1.0);
     }
-    else if (midpoint.y < -55.0){
+    else if (midpoint.y < -185.0){
         wColor = vec4(1.0, 1.0, 0.0, 1.0);
 
     }
-    else if (midpoint.y < -45.0){
+    else if (midpoint.y < -160.0){
 
     }
-    else if (midpoint.y < -40.0){
+    else if (midpoint.y < -150.0){
        wColor = vec4(0.5, 0.5, 0.5, 1.0); 
     }
 

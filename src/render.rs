@@ -250,7 +250,9 @@ impl Chunk {
                 let x = pos[0] + j as f32;
                 let z = pos[1] + i as f32;
                 let mut y = noise_map.poll(((x+5000.0)/10000.0) as f64, ((z+5000.0)/10000.0) as f64) as f32 * 100.0-110.0;
-                if y < -60.0 {y=-60.0}
+                y *= 3.0;
+                if y < -200.0 {y=-200.0}
+
                 
 
                 // X

@@ -78,7 +78,7 @@ void main() {
 
     // Init
     origin = vec3(gl_in[0].gl_Position.x, gl_in[0].gl_Position.y, gl_in[0].gl_Position.z);
-    block_size = vec3(1.0,1.0,1.0);
+    block_size = vec3(1.0,3.0,1.0);
     shift = block_size/2.0;
 
     brown = normalize(vec3(97.0, 59.0, 10.0));
